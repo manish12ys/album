@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Albums</title>
+  
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f1f1f1;
+            color: #333;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        footer {
+            background-color: #333;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .container {
+            padding: 20px;
+            margin: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            padding: 10px 20px;
+        }
+
+        .create-folder-container {
+            display: inline-block;
+            position: relative;
+        }
+
+        .folder-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .folder {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 10px;
+            width: 200px;
+            background-color: #fafafa;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .folder:hover {
+            transform: scale(1.05);
+        }
+
+        .folder button {
+            background-color: blue;
+            color: white;
+            padding: 8px;
+            border: none;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 0.9em;
+            margin-right: 5px; /* Added margin for spacing between buttons */
+        }
+
+        .folder button:hover {
+            background-color: blue;
+        }
+
+        .folder .share-btn {
+            background-color: blue;
+        }
+
+        .folder .share-btn:hover {
+            background-color: blue;
+        }
+
+        .folder .save-btn {
+            background-color: blue;
+        }
+
+        .folder .save-btn:hover {
+            background-color: blue;
+        }
+
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .image {
+            max-width: 100%;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-btn {
+            margin-top: 10px;
+            padding: 12px 25px;
+            background-color: blue;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 1.2em;
+            position: absolute;
+            right: 20px;
+            bottom: 80px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .upload-btn:hover {
+            background-color: #218838;
+        }
+
+        .create-folder-container button,
+        .create-folder-container input {
+            padding: 10px;
+            font-size: 1em;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .create-folder-container button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .create-folder-container button:hover {
+            background-color: #0056b3;
+        }
+
+        .create-folder-container input {
+            margin-right: 10px;
+            width: 200px;
+        }
+
+        /* Positioning the create folder elements */
+        .create-folder-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .recent {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .recent img {
+            max-width: 150px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Image Album Manager</h1>
+    </header>
+
+    <div class="header-buttons">
+        <div class="create-folder-container">
+            <button class="create-folder-btn" onclick="showFolderInput()">Create Folder</button>
+            <input type="text" id="folderName" placeholder="Enter folder name" style="display: none;">
+            <button id="createFolderBtn" onclick="createFolder()" style="display: none;">Confirm</button>
+        </div>
+        <button class="upload-btn" onclick="document.getElementById('uploadPhotos').click()">+</button>
+    </div>
+
+    <div class="container">
+        <div id="folders"></div>
+
+        <h2>Recent Files & Photos</h2>
+        <div id="recentFiles" class="recent"></div>
+    </div>
+
+    <input type="file" id="uploadPhotos" multiple accept="image/*" style="display: none;" onchange="uploadImages(event, document.getElementById('folders'))">
+
+    <footer>
+        <p>&copy; 2025 Image Album Manager. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function showFolderInput() {
+            document.getElementById('folderName').style.display = 'block';
+            document.getElementById('createFolderBtn').style.display = 'block';
+        }
+
+        function createFolder() {
+            const name = document.getElementById('folderName').value;
+            if (!name) return alert('Enter a folder name');
+            
+            const folder = document.createElement('div');
+            folder.className = 'folder';
+            folder.innerHTML = `
+                <strong>${name}</strong> 
+                <button onclick="renameFolder(this)">Rename</button>
+                <button onclick="deleteFolder(this)">Delete</button>
+                <button onclick="saveFolder(this)" class="save-btn">Save</button> <!-- Save button added -->
+                <button class="share-btn" onclick="shareFolder(this)">Share</button>
+                <input type="file" multiple accept="image/*" onchange="uploadImages(event, this)">
+                <div class="images"></div>
+            `;
+            
+            document.getElementById('folders').appendChild(folder);
+            document.getElementById('folderName').value = '';
+            document.getElementById('folderName').style.display = 'none';
+            document.getElementById('createFolderBtn').style.display = 'none';
+
+            
+            document.getElementById('saveFilesBtn').style.display = 'inline-block';
+        }
+
+        function renameFolder(button) {
+            const newName = prompt('Enter new folder name:');
+            if (newName) button.parentElement.querySelector('strong').innerText = newName;
+        }
+
+        function deleteFolder(button) {
+            if (confirm('Delete this folder?')) button.parentElement.remove();
+        }
+
+        function uploadImages(event, input) {
+            const imagesDiv = input.nextElementSibling || input;
+            imagesDiv.innerHTML = ''; 
+            const recentDiv = document.getElementById('recentFiles');
+            
+            [...event.target.files].forEach(file => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'image';
+                    imagesDiv.appendChild(img);
+                    
+                    const recentImg = img.cloneNode();
+                    recentDiv.appendChild(recentImg);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function shareFolder(button) {
+            alert(`Share link for folder '${button.parentElement.querySelector('strong').innerText}' copied to clipboard!`);
+        }
+
+        
+        function saveFolder(button) {
+            const folder = button.closest('.folder');
+            const folderName = folder.querySelector('strong').innerText;
+            const images = Array.from(folder.querySelectorAll('.images img')).map(img => img.src);
+            
+            const folderData = { folderName, images };
+            const blob = new Blob([JSON.stringify(folderData)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `${folderName}-data.json`;
+            link.click();
+        }
+
+        
+        function saveFiles() {
+            const folders = document.getElementById('folders');
+            const folderData = [];
+
+            folders.querySelectorAll('.folder').forEach(folder => {
+                const folderName = folder.querySelector('strong').innerText;
+                const images = Array.from(folder.querySelectorAll('.images img')).map(img => img.src);
+                folderData.push({ folderName, images });
+            });
+
+            const blob = new Blob([JSON.stringify(folderData)], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'image-album-manager.json';
+            link.click();
+        }
+    </script>
+</body>
+</html>
